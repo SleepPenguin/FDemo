@@ -9,13 +9,7 @@ exg = Exchange()
 
 @app.route("/")
 def index():
-    symbol = "BTC/USDT"
-    timeframe = "1d"
-    end = utils.get_now_ms()
-    start = end
-    df = exg.get_kline(symbol, timeframe, start, end)
-    data = utils.df2chart_json(df)
-    return render_template("index.html", json_data=data)
+    return render_template("index.html")
 
 
 @app.route("/update", methods=["POST"])

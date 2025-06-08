@@ -3,50 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>FDemoKline</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/klinecharts/dist/umd/klinecharts.min.js"></script>
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-    </style>
 </head>
 <body>
+<div class="container">
+    <div id="chart"></div>
+    <div id="sidebar">
+        <h3>Parameters</h3>
 
-<div style="display: flex; height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-    <div id="chart" style="flex: 1;"></div>
-    <div style="
-        width: 13%;
-        margin-left: 40px;
-        padding: 24px;
-        background: #ffffff;
-        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
-        border-left: 1px solid #e0e0e0;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-    ">
-        <h3 style="margin: 0; font-size: 20px; color: #333;">Parameters</h3>
-
-        <div style="display: flex; flex-direction: column;">
-            <label for="symbol" style="margin-bottom: 4px; color: #555;">Symbol</label>
-            <input type="text" id="symbol" value="BTC/USDT" style="
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                font-size: 14px;
-            ">
+        <div class="param-group">
+            <label for="symbol">Symbol</label>
+            <input type="text" id="symbol" value="BTC/USDT">
         </div>
 
-        <div style="display: flex; flex-direction: column;">
-            <label for="timeframe" style="margin-bottom: 4px; font-size: 13px; color: #555;">Timeframe</label>
-            <select id="timeframe" style="
-                padding: 6px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                font-size: 13px;
-            ">
+        <div class="param-group">
+            <label for="timeframe">Timeframe</label>
+            <select id="timeframe">
                 <option value="1m">1m</option>
                 <option value="3m">3m</option>
                 <option value="5m">5m</option>
@@ -61,154 +34,22 @@
             </select>
         </div>
 
-
-        <div style="display: flex; flex-direction: column;">
-            <label for="start_date" style="margin-bottom: 4px; color: #555;">Start Date</label>
-            <input type="date" id="start_date" value="2025-06-08" style="
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                font-size: 14px;
-            ">
+        <div class="param-group">
+            <label for="start_date">Start Date</label>
+            <input type="date" id="start_date" value="2025-06-08">
         </div>
 
-        <div style="display: flex; flex-direction: column;">
-            <label for="end_date" style="margin-bottom: 4px; color: #555;">End Date</label>
-            <input type="date" id="end_date" value="2025-06-08" style="
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                font-size: 14px;
-            ">
+        <div class="param-group">
+            <label for="end_date">End Date</label>
+            <input type="date" id="end_date" value="2025-06-08">
         </div>
 
-        <button onclick="sendParams()" style="
-            margin-top: 12px;
-            padding: 10px;
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 15px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        " onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
-            Load
-        </button>
+        <button id="loadButton" class="load-button">Load</button>
     </div>
 </div>
 
-<script>
-    let chart;
-
-    klinecharts.registerIndicator({
-        name: 'ColorfulVolume',
-        shortName: 'Volume',
-        zLevel: -1,
-        figures: [],
-        calc: dataList => dataList.map(data => ({volume: data.volume, close: data.close, open: data.open})),
-        createTooltipDataSource: ({indicator, crosshair}) => {
-            const result = indicator.result;
-            const data = result[crosshair.dataIndex];
-            if (data) {
-                const color = data.open > data.close ? 'rgb(224, 152, 199)' : 'rgb(143, 211, 232)';
-                return {
-                    legends: [
-                        {title: '', value: {text: `${data.volume.toFixed(2)}`, color}},
-                    ]
-                };
-            }
-            return {};
-        },
-        draw: ({ctx, chart, indicator, bounding, xAxis}) => {
-            const {realFrom, realTo} = chart.getVisibleRange();
-            const {gapBar, halfGapBar} = chart.getBarSpace();
-            const {result} = indicator;
-            let maxVolume = 0;
-            for (let i = realFrom; i < realTo; i++) {
-                const data = result[i];
-                if (data) {
-                    maxVolume = Math.max(maxVolume, data.volume);
-                }
-            }
-            const totalHeight = bounding.height * 0.4;
-            const Rect = klinecharts.getFigureClass('rect');
-            for (let i = realFrom; i < realTo; i++) {
-                const data = result[i];
-                if (data) {
-                    const height = Math.round(data.volume / maxVolume * totalHeight);
-                    const color = data.open > data.close ? 'rgba(234,205,224,0.6)' : 'rgba(206,234,243,0.6)';
-                    new Rect({
-                        name: 'rect',
-                        attrs: {
-                            x: xAxis.convertToPixel(i) - halfGapBar,
-                            y: bounding.height - height,
-                            width: gapBar,
-                            height
-                        },
-                        styles: {color}
-                    }).draw(ctx);
-                }
-            }
-            return true;
-        }
-    });
-
-    klinecharts.registerIndicator({
-            name: 'ChangeRate',
-            shortName: 'Chg',
-            figures: [],
-            calc: dataList => dataList.map(data => ({close: data.close, open: data.open})),
-            createTooltipDataSource: ({indicator, crosshair}) => {
-                const result = indicator.result;
-                const data = result[crosshair.dataIndex];
-                if (data) {
-                    const color = data.open < data.close ? 'rgb(73,182,236)' : 'rgb(230,104,126)';
-                    const rate = (data.close - data.open) / data.open
-                    const percentStr = `${(rate * 100).toFixed(2)}%`;
-                    return {
-                        legends: [
-                            {title: '', value: {text: percentStr, color}},
-                        ]
-                    };
-                }
-                return {};
-            },
-        }
-    )
-
-    window.onload = function () {
-        const data = JSON.parse(`{{ json_data | safe }}`)
-        chart = klinecharts.init('chart', {timezone: 'UTC'});
-
-        chart.createIndicator('ChangeRate', false, {id: 'candle_pane'})
-        chart.createIndicator('ColorfulVolume', true, {id: 'candle_pane'});
-
-        chart.applyNewData(data)
-
-        window.addEventListener('resize', function () {
-            chart.resize()
-        })
-    }
-
-
-    function sendParams() {
-        const symbol = document.getElementById('symbol').value;
-        const timeframe = document.getElementById('timeframe').value;
-        const start_date = document.getElementById('start_date').value;
-        const end_date = document.getElementById('end_date').value;
-
-        fetch('/update', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({symbol, timeframe, start_date, end_date})
-        })
-            .then(res => res.json())
-            .then(dataList => {
-                chart.applyNewData(JSON.parse(dataList));
-            })
-            .catch(err => alert("error update: " + err));
-    }
-</script>
+<script src="{{ url_for('static', filename='js/indicators.js') }}"></script>
+<script src="{{ url_for('static', filename='js/paramHandlers.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chartInit.js') }}"></script>
 </body>
 </html>
