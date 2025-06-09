@@ -1,13 +1,48 @@
 /**
  * 初始化图表并设置事件处理
  */
+const subscriptNumbers = {
+    '0': '₀',
+    '1': '₁',
+    '2': '₂',
+    '3': '₃',
+    '4': '₄',
+    '5': '₅',
+    '6': '₆',
+    '7': '₇',
+    '8': '₈',
+    '9': '₉'
+}
+
+
 window.onload = function () {
     // 初始化图表
     chart = klinecharts.init('chart', {timezone: 'UTC'});
+    chart.setDecimalFold({
+        format: value => {
+            const vl = `${value}`;
+            const reg = new RegExp('\\.0{3,}[1-9][0-9]*$');
+            if (reg.test(vl)) {
+                const result = vl.split('.');
+                const lastIndex = result.length - 1;
+                const v = result[lastIndex];
+                const match = /0*/.exec(v);
+                if (match) {
+                    const count = `${match[0].length}`;
+                    result[lastIndex] = v.replace(/0*/,
+                        `0${count.replace(/\d/,
+                            $1 => subscriptNumbers[$1] ?? '')}`);
+                    return result.join('.')
+                }
+            }
+            return vl;
+        }
+    })
 
     // 添加指标
+    chart.createIndicator('VOL', false, {id: 'VOL_pane', height: 150});
     chart.createIndicator('ChangeRate', false, {id: 'candle_pane'});
-    chart.createIndicator('ColorfulVolume', true, {id: 'candle_pane'});
+
 
     // 响应式调整
     window.addEventListener('resize', function () {
@@ -22,6 +57,28 @@ window.onload = function () {
 
     sendParams();
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const timeframeSelect = document.getElementById("timeframe");
+
+    fetch('/api/timeframes')
+        .then(response => response.json())
+        .then(timeframes => {
+            timeframes.forEach(timeframe => {
+                const option = document.createElement('md-select-option');
+                option.setAttribute('value', timeframe);
+
+                const headline = document.createElement('div');
+                headline.setAttribute('slot', 'headline');
+                headline.textContent = timeframe;
+
+                option.appendChild(headline);
+                timeframeSelect.appendChild(option);
+            });
+        }).catch(error => console.error('Error fetching timeframes:', error));
+})
+
+
 
 /**
  * 设置默认日期范围

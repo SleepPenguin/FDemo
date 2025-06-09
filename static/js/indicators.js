@@ -1,18 +1,21 @@
 // 注册自定义指标 - 彩色成交量
 klinecharts.registerIndicator({
     name: 'ColorfulVolume',
-    shortName: 'Volume',
+    shortName: 'Chg:',
     zLevel: -1,
     figures: [],
+    series: 'price',
     calc: dataList => dataList.map(data => ({volume: data.volume, close: data.close, open: data.open})),
     createTooltipDataSource: ({indicator, crosshair}) => {
         const result = indicator.result;
         const data = result[crosshair.dataIndex];
         if (data) {
-            const color = data.open > data.close ? 'rgb(224, 152, 199)' : 'rgb(143, 211, 232)';
+            const color = data.open > data.close ? 'rgb(230,16,40)' : 'rgb(9,234,123)';
+            const rate = (data.close - data.open) / data.open;
+            const percentStr = `${(rate * 100).toFixed(2)}%`;
             return {
                 legends: [
-                    {title: '', value: {text: `${data.volume.toFixed(2)}`, color}},
+                    {title: '', value: {text: percentStr, color}},
                 ]
             };
         }
@@ -52,25 +55,27 @@ klinecharts.registerIndicator({
     }
 });
 
-// 注册变化率指标
 klinecharts.registerIndicator({
     name: 'ChangeRate',
-    shortName: 'Chg',
+    shortName: '',
+    zLevel: -1,
     figures: [],
+    series: 'price',
     calc: dataList => dataList.map(data => ({close: data.close, open: data.open})),
     createTooltipDataSource: ({indicator, crosshair}) => {
         const result = indicator.result;
         const data = result[crosshair.dataIndex];
         if (data) {
-            const color = data.open < data.close ? 'rgb(73,182,236)' : 'rgb(230,104,126)';
-            const rate = (data.close - data.open) / data.open
+            const color = data.open > data.close ? 'rgb(230,16,40)' : 'rgb(9,234,123)';
+            const rate = (data.close - data.open) / data.open;
             const percentStr = `${(rate * 100).toFixed(2)}%`;
             return {
                 legends: [
-                    {title: '', value: {text: percentStr, color}},
+                    {title: 'Chg: ', value: {text: percentStr, color}},
                 ]
             };
         }
         return {};
     },
 });
+

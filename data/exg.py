@@ -7,10 +7,10 @@ import utils
 
 
 class Exchange:
-    def __init__(self, exchange_name: str = "binance", rate_limit=True):
-        exchange_class = getattr(ccxt, exchange_name)
-        self.exchange = exchange_class({'enableRateLimit': rate_limit})
-        self.db = DolphinDB(exchange_name)
+    def __init__(self):
+        self.exchange = ccxt.binance()
+        self.exchange.load_markets()
+        self.db = DolphinDB(self.exchange.name.lower())
 
     def _ohlcv_from_api(self, symbol, timeframe, time_grid, limit=1000) -> pd.DataFrame:
         since, end = time_grid[0], time_grid[-1]
@@ -25,7 +25,7 @@ class Exchange:
                     all_data.extend(ohlcv)
                     since = ohlcv[-1][0] + 1
                     pbar.update(1)
-                    time.sleep(self.exchange.rateLimit / 1000)
+                    time.sleep(limit/ 1000)
                 except Exception as e:
                     raise RuntimeError(f"Error fetching data: {e}")
         ohlcv = ['open', 'high', 'low', 'close', 'volume']

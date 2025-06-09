@@ -31,17 +31,12 @@ def df2chart_json(df: pd.DataFrame):
     return json.dumps(result)
 
 
-def grid_time(timeframe, start_time=None, end_time=None):
-    min_len = 300
+def grid_time(timeframe, start_time: int, end_time: int):
+    min_len = 1000
     delta = tf2ms(timeframe)
-    end_grid = (get_now_ms() // delta) * delta - delta
-    start_grid = end_grid - min_len * delta
-    default_grid = list(range(start_grid, end_grid + delta, delta))
-    if start_time is None or end_time is None:
-        print(f"None in start_time: {start_time}, end_time: {end_time}, return default line")
-        return default_grid
-    end_grid = (end_time // delta) * delta  # 对齐到前一个格点
-    end_grid = min(end_grid, default_grid[-1])
-    start_grid = (start_time // delta + 1) * delta
-    start_grid = min(start_grid, end_grid - min_len * delta)
-    return list(range(start_grid, end_grid + delta, delta))
+    end_grid = (end_time // delta) * delta
+    start_grid = min((start_time // delta + 1) * delta, end_grid - delta * min_len)
+    res = list(range(start_grid, end_grid + delta, delta))
+    min_time = ccxt.Exchange.parse8601("2010-01-01 00:00:00")
+    max_time = (get_now_ms() // delta) * delta - delta
+    return [x for x in res if min_time <= x <= max_time]

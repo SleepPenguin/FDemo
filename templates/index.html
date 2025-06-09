@@ -3,53 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <title>FDemoKline</title>
+    <!-- Material fonts and import map setup -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <script type="importmap">
+        {
+          "imports": {
+            "@material/web/": "https://esm.run/@material/web/"
+          }
+        }
+    </script>
+
+    <script type="module">
+        import '@material/web/all.js';
+        import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
+
+        document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/klinecharts/dist/umd/klinecharts.min.js"></script>
 </head>
 <body>
 <div class="container">
-    <div id="chart"></div>
-    <div id="sidebar">
-        <h3>Parameters</h3>
-
-        <div class="param-group">
-            <label for="symbol">Symbol</label>
-            <input type="text" id="symbol" value="BTC/USDT">
+    <div class="top-controls">
+        <div class="control-item">
+            <md-outlined-text-field
+                    id="symbol"
+                    label="Symbol"
+                    value="BTC/USDT">
+            </md-outlined-text-field>
         </div>
 
-        <div class="param-group">
-            <label for="timeframe">Timeframe</label>
-            <select id="timeframe">
-                <option value="1m">1m</option>
-                <option value="3m">3m</option>
-                <option value="5m">5m</option>
-                <option value="15m">15m</option>
-                <option value="30m">30m</option>
-                <option value="1h">1h</option>
-                <option value="2h">2h</option>
-                <option value="4h">4h</option>
-                <option value="6h">6h</option>
-                <option value="12h">12h</option>
-                <option value="1d" selected>1d</option>
-            </select>
+        <div class="control-item">
+            <md-filled-tonal-icon-button id="searchSymbol">
+                <md-icon>search</md-icon>
+            </md-filled-tonal-icon-button>
         </div>
 
-        <div class="param-group">
-            <label for="start_date">Start Date</label>
-            <input type="date" id="start_date" value="2025-06-08">
+        <div class="control-item">
+            <md-outlined-select id="timeframe" label="Timeframe">
+                <md-select-option value="1d" selected>
+                    <div slot="headline">1d</div>
+                </md-select-option>
+            </md-outlined-select>
         </div>
 
-        <div class="param-group">
-            <label for="end_date">End Date</label>
-            <input type="date" id="end_date" value="2025-06-08">
+        <div class="control-item">
+            <md-outlined-text-field
+                    id="start_date"
+                    label="Start Date"
+                    type="date"
+                    value="2025-06-08">
+            </md-outlined-text-field>
         </div>
 
-        <button id="loadButton" class="load-button">Load</button>
+        <div class="control-item">
+            <md-outlined-text-field
+                    id="end_date"
+                    label="End Date"
+                    type="date"
+                    value="2025-06-08">
+            </md-outlined-text-field>
+        </div>
+
+        <div class="control-item">
+            <md-filled-tonal-button id="loadButton">
+                <md-icon slot="icon">refresh</md-icon>
+                Load
+            </md-filled-tonal-button>
+        </div>
     </div>
+
+    <div id="chart"></div>
 </div>
 
 <script src="{{ url_for('static', filename='js/indicators.js') }}"></script>
 <script src="{{ url_for('static', filename='js/paramHandlers.js') }}"></script>
 <script src="{{ url_for('static', filename='js/chartInit.js') }}"></script>
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
 </body>
 </html>

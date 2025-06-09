@@ -31,5 +31,16 @@ def update():
     return jsonify(data)
 
 
+@app.route('/api/timeframes')
+def get_timeframes_api():
+    timeframes = list(exg.exchange.timeframes.keys())
+    return jsonify(timeframes)
+
+@app.route('/api/symbols')
+def get_all_symbols():
+    symbols = exg.exchange.symbols
+    return jsonify(symbols)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
