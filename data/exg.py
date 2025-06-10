@@ -31,7 +31,7 @@ class Exchange:
         ohlcv = ['open', 'high', 'low', 'close', 'volume']
         df = pd.DataFrame(all_data, columns=['timestamp'] + ohlcv).set_index('timestamp')
         df = df.reindex(time_grid)  # 补齐缺失时间点
-        df.index = pd.to_datetime(df.index, unit='ms')
+        df.index = df.index.map(utils.ms2ts)
         df.index.name = 'datetime'
         return df[ohlcv]
 
