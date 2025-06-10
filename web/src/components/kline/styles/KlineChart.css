@@ -1,0 +1,95 @@
+/* KlineChart 组件样式 */
+
+:root {
+    --md-circular-progress-size: 36px;
+}
+
+.kline-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 100vh;
+}
+
+.kline-chart {
+    flex: 1;
+    width: 100%;
+    min-height: 400px;
+}
+
+.kline-top-controls {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.kline-control-item {
+    display: flex;
+    align-items: center;
+}
+
+.kline-date-field {
+    width: 130px;
+    height: 40px;
+}
+
+.kline-symbol-field {
+    width: 180px;
+}
+
+.kline-timeframe-select {
+    width: 100px;
+    min-width: 30px;
+}
+
+.kline-timeframe-select::part(menu) {
+    max-height: 300px;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(237, 216, 230) transparent;
+}
+
+.kline-outlined-field {
+    --md-outlined-field-top-space: 8px;
+    --md-outlined-field-bottom-space: 8px;
+}
+
+.kline-loading-indicator {
+    display: flex;
+    align-items: center;
+    height: 40px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .kline-top-controls {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px;
+    }
+    
+    .kline-control-item {
+        width: 100%;
+    }
+    
+    .kline-symbol-field,
+    .kline-date-field,
+    .kline-timeframe-select {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .kline-container {
+        min-height: 100vh;
+    }
+    
+    .kline-chart {
+        min-height: 300px;
+    }
+    
+    .kline-top-controls {
+        padding: 8px;
+        gap: 8px;
+    }
+} 

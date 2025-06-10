@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timezone
 
 import ccxt
@@ -28,7 +27,7 @@ def df2chart_json(df: pd.DataFrame):
             'close': row['close'],
             'volume': row['volume'],
         })
-    return json.dumps(result)
+    return result
 
 
 def grid_time(timeframe, start_time: int, end_time: int):

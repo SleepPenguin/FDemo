@@ -3,3 +3,6 @@ backup
 .idea
 config.yml
 node_modules
+
+__pycache__
+.vscode

@@ -1,19 +1,16 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 import ccxt
 import utils
 from data.exg import Exchange
 
 app = Flask(__name__)
+CORS(app)  # 启用CORS支持
 exg = Exchange()
 
 
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-
-@app.route("/update", methods=["POST"])
-def update():
+@app.route("/api/kline", methods=["POST"])
+def get_kline():
     req = request.get_json()
     symbol = req.get("symbol", "BTC/USDT")
     timeframe = req.get("timeframe", "1d")
@@ -32,12 +29,13 @@ def update():
 
 
 @app.route('/api/timeframes')
-def get_timeframes_api():
+def get_timeframes():
     timeframes = list(exg.exchange.timeframes.keys())
     return jsonify(timeframes)
 
+
 @app.route('/api/symbols')
-def get_all_symbols():
+def get_symbols():
     symbols = exg.exchange.symbols
     return jsonify(symbols)
 
