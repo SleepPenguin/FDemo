@@ -4,7 +4,7 @@
 
 ## 项目结构
 
-```
+```bash
 FDemo/
 ├── web/                # 前端Vue项目
 │   ├── src/           # Vue源代码
@@ -19,42 +19,48 @@ FDemo/
 ### 后端
 
 1. 创建并激活Python虚拟环境（可选）：
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-```
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   venv\Scripts\activate     # Windows
+   ```
 
 2. 安装依赖：
-```bash
-pip install -r requirements.txt
-```
+
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 3. 启动后端服务：
-```bash
-python app.py
-```
+
+   ```bash
+   python app.py
+   ```
 
 ### 前端
 
 1. 进入前端项目目录：
-```bash
-cd web
-```
+
+   ```bash
+   cd web
+   ```
 
 2. 安装依赖：
-```bash
-npm install
-```
+
+   ```bash
+   npm install
+   ```
 
 3. 启动开发服务器：
-```bash
-npm run dev
-```
+
+   ```bash
+   npm run dev
+   ```
 
 ## 使用说明
 
-1. 在浏览器中访问 http://localhost:5173
+1. 在浏览器中访问 <http://localhost:5173>
 2. 选择交易对、时间周期和日期范围
 3. 点击"Load"按钮加载K线数据
 
@@ -65,4 +71,3 @@ npm run dev
 dolphindb缓存历史数据
 
 js渲染K线至网页
-
