@@ -6,8 +6,8 @@ from data.exg import Exchange
 class TestStartegy(Engine):
     def __init__(self, exg: Exchange):
         super().__init__(exg)
-        self.simframe = "30m"
-        self.used_info = [("BTC/USDT", "1d"), ("BTC/USDT", self.simframe)]
+        self.simframe = "1m"
+        self.used_info = {("BTC/USDT", "1d"): 30, ("BTC/USDT", self.simframe): 0}
 
     def on_bar(self):
         # 只在每天23:00执行

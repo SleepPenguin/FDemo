@@ -16,21 +16,23 @@ class Engine:
         self.trade_csv = CSVFile(
             "trade.csv", ["time", "symbol", "type", "amount", "price", "cost"]
         )
-        # 预先缓存数据
-        self.used_info = [("BTC/USDT", "1d")]
+        # used_info: {(symbol, timeframe): warmup}
+        self.used_info = {("BTC/USDT", "1d"): 30}
+        # cache_data: {(symbol, timeframe): df}
+        self.cache_data = {}
 
     def prepare_data(self):
-        for symbol, timeframe in self.used_info:
-            self.exg.get_kline(
-                symbol, timeframe, ts2ms(self.start_time), ts2ms(self.end_time)
-            )
+        print("prepare data for backtesting, used_info: ", self.used_info)
+        for (symbol, timeframe), warmup in self.used_info.items():
+            end_ms = ts2ms(self.end_time)
+            start_ms = ts2ms(self.start_time) - tf2ms(timeframe) * (warmup + 1)
+            df = self.exg.get_kline(symbol, timeframe, start_ms, end_ms)
+            self.cache_data[(symbol, timeframe)] = df
             print(f"already cache {symbol} {timeframe} data for backtesting")
+        print("prepare data for backtesting completed")
 
     def get_price(self, symbol, timeframe, count=1):
-        end_ms = ts2ms(self.now) - tf2ms(self.simframe)
-        df = self.exg.get_kline(
-            symbol, timeframe, end_ms - tf2ms(timeframe) * count, end_ms
-        )
+        df = self.cache_data[(symbol, timeframe)]
         df = df.dropna()
         preview = (df.index + tf2ts(timeframe)) <= self.now
         res = df[preview].tail(count)
@@ -52,19 +54,29 @@ class Engine:
         return self.get_price(symbol, self.simframe, 1)["close"].iloc[-1]
 
     def buy(self, symbol, amount):
-        # TODO: 根据交易所限制处理订单
+        amount = float(self.exg.exchange.amount_to_precision(symbol, amount))
         price = self.get_price_now(symbol)
         cost = amount * price
+        if self.wallet[self.base] < cost:
+            print(
+                f"wallet: {self.wallet} not enough balance {self.base} to buy {symbol} {amount}, cancel buy"
+            )
+            return
         if not self.wallet.get(symbol):
             self.wallet[symbol] = 0
-        self.wallet[symbol] += amount
         self.wallet[self.base] -= cost
+        self.wallet[symbol] += amount
         self.trade_csv.record([self.now, symbol, "buy", amount, price, cost])
 
     def sell(self, symbol, amount):
-        # TODO: 根据交易所限制处理订单
+        amount = float(self.exg.exchange.amount_to_precision(symbol, amount))
         price = self.get_price_now(symbol)
         cost = amount * price
+        if self.wallet[symbol] < amount:
+            print(
+                f"{symbol} in wallet is {self.wallet[symbol]}, but amount is {amount}, cancel sell"
+            )
+            return
         self.wallet[symbol] -= amount
         self.wallet[self.base] += cost
         self.trade_csv.record([self.now, symbol, "sell", amount, price, cost])

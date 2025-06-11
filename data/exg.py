@@ -1,4 +1,3 @@
-import time
 from tqdm import tqdm
 import ccxt
 import pandas as pd
@@ -25,7 +24,7 @@ class Exchange:
                     all_data.extend(ohlcv)
                     since = ohlcv[-1][0] + 1
                     pbar.update(1)
-                    time.sleep(limit/ 1000)
+                    # time.sleep(limit/ 1000)
                 except Exception as e:
                     raise RuntimeError(f"Error fetching data: {e}")
         ohlcv = ['open', 'high', 'low', 'close', 'volume']
