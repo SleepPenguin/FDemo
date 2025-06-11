@@ -1,10 +1,47 @@
 import ccxt
 import pandas as pd
+import csv
+from utils import config
+
+
+class CSVFile:
+    def __init__(self, filename: str, headers: list):
+        filename = f"{config.LOG_PATH}/{filename}"
+        self.filename = filename
+        # 首先以写入模式创建文件并写入表头
+        with open(filename, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+
+        # 然后以追加模式打开并保持文件句柄
+        self.file = open(filename, "a", newline="", encoding="utf-8")
+        self.writer = csv.writer(self.file)
+
+    def record(self, row: list):
+        row = [str(x) for x in row]
+        self.writer.writerow(row)
+        # 立即将数据写入磁盘
+        self.file.flush()
+
+    def __del__(self):
+        # 析构函数中关闭文件
+        if hasattr(self, "file"):
+            self.file.close()
+
+    def close(self):
+        # 提供显式关闭方法
+        if hasattr(self, "file"):
+            self.file.close()
 
 
 def tf2ms(timeframe: str) -> int:
     """将时间周期字符串转换为毫秒数"""
     return ccxt.Exchange.parse_timeframe(timeframe) * 1000
+
+
+def tf2ts(timeframe: str) -> pd.Timestamp:
+    """将时间周期字符串转换为pandas Timestamp对象"""
+    return pd.Timedelta(milliseconds=tf2ms(timeframe))
 
 
 def get_now_ms() -> int:

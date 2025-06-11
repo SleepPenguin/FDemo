@@ -1,0 +1,73 @@
+from data.exg import Exchange
+import pandas as pd
+from utils import tf2ms, ts2ms, tf2ts, CSVFile
+from tqdm import tqdm
+
+
+class Engine:
+    def __init__(self, exg: Exchange):
+        self.exg = exg
+        self.start_time = pd.Timestamp("2023-01-01")
+        self.end_time = pd.Timestamp("2024-01-01")
+        self.simframe = "1m"
+        self.base = "USDT"
+        self.now = self.start_time
+        self.wallet = {self.base: 1000}
+        self.trade_csv = CSVFile(
+            "trade.csv", ["time", "symbol", "type", "amount", "price", "cost"]
+        )
+        # 预先缓存数据
+        self.used_info = [("BTC/USDT", "1d")]
+
+    def prepare_data(self):
+        for symbol, timeframe in self.used_info:
+            self.exg.get_kline(
+                symbol, timeframe, ts2ms(self.start_time), ts2ms(self.end_time)
+            )
+            print(f"already cache {symbol} {timeframe} data for backtesting")
+
+    def get_price(self, symbol, timeframe, count=1):
+        end_ms = ts2ms(self.now) - tf2ms(self.simframe)
+        df = self.exg.get_kline(
+            symbol, timeframe, end_ms - tf2ms(timeframe) * count, end_ms
+        )
+        df = df.dropna()
+        preview = (df.index + tf2ts(timeframe)) <= self.now
+        res = df[preview].tail(count)
+        return None if len(res) != count else res
+
+    def run(self):
+        self.prepare_data()
+        print("Backtesting started")
+        total_steps = (self.end_time - self.now) // tf2ts(self.simframe)
+        with tqdm(total=total_steps, desc="Backtesting Progress") as pbar:
+            while self.now < self.end_time:
+                self.on_bar()
+                self.now += tf2ts(self.simframe)
+                pbar.update(1)
+        print("Backtesting completed")
+
+    def get_price_now(self, symbol):
+        # TODO: 使用订单簿获取价格
+        return self.get_price(symbol, self.simframe, 1)["close"].iloc[-1]
+
+    def buy(self, symbol, amount):
+        # TODO: 根据交易所限制处理订单
+        price = self.get_price_now(symbol)
+        cost = amount * price
+        if not self.wallet.get(symbol):
+            self.wallet[symbol] = 0
+        self.wallet[symbol] += amount
+        self.wallet[self.base] -= cost
+        self.trade_csv.record([self.now, symbol, "buy", amount, price, cost])
+
+    def sell(self, symbol, amount):
+        # TODO: 根据交易所限制处理订单
+        price = self.get_price_now(symbol)
+        cost = amount * price
+        self.wallet[symbol] -= amount
+        self.wallet[self.base] += cost
+        self.trade_csv.record([self.now, symbol, "sell", amount, price, cost])
+
+    def on_bar(self):
+        raise NotImplementedError("on_bar method not implemented")
