@@ -14,3 +14,8 @@ DB_HOST = config[DB_NAME]["host"]
 DB_PORT = int(config[DB_NAME]["port"])
 DB_USER = config[DB_NAME]["user"]
 DB_PASSWD = config[DB_NAME]["passwd"]
+
+TRADE_CSV_NAME = "trade.csv"
+TRADE_CSV_HEADER = ["time", "symbol", "side", "type", "amount", "price", "cost", "wallet", "tag"]
+
+HTTPS_PROXY = config["proxy"]["https"]

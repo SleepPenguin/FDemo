@@ -3,11 +3,13 @@ import ccxt
 import pandas as pd
 from data.db import DolphinDB
 import utils
+from utils import config
 
 
 class Exchange:
     def __init__(self):
         self.exchange = ccxt.binance()
+        self.exchange.https_proxy = config.HTTPS_PROXY
         self.exchange.load_markets()
         self.db = DolphinDB(self.exchange.name.lower())
 

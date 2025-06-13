@@ -2,6 +2,7 @@ from data.exg import Exchange
 import pandas as pd
 from utils import tf2ms, ts2ms, tf2ts, CSVFile
 from tqdm import tqdm
+from utils import config
 
 
 class Engine:
@@ -13,9 +14,7 @@ class Engine:
         self.base = "USDT"
         self.now = self.start_time
         self.wallet = {self.base: 1000}
-        self.trade_csv = CSVFile(
-            "trade.csv", ["time", "symbol", "type", "amount", "price", "cost"]
-        )
+        self.trade_csv = CSVFile(config.TRADE_CSV_NAME, config.TRADE_CSV_HEADER)
         # used_info: {(symbol, timeframe): warmup}
         self.used_info = {("BTC/USDT", "1d"): 30}
         # cache_data: {(symbol, timeframe): df}
@@ -53,7 +52,7 @@ class Engine:
         # TODO: 使用订单簿获取价格
         return self.get_price(symbol, self.simframe, 1)["close"].iloc[-1]
 
-    def buy(self, symbol, amount):
+    def buy(self, symbol, amount, tag=None, type="market"):
         amount = float(self.exg.exchange.amount_to_precision(symbol, amount))
         price = self.get_price_now(symbol)
         cost = amount * price
@@ -66,9 +65,21 @@ class Engine:
             self.wallet[symbol] = 0
         self.wallet[self.base] -= cost
         self.wallet[symbol] += amount
-        self.trade_csv.record([self.now, symbol, "buy", amount, price, cost])
+        self.trade_csv.record(
+            [
+                self.now,
+                symbol,
+                "buy",
+                type,
+                amount,
+                price,
+                cost,
+                self.wallet[self.base],
+                tag,
+            ]
+        )
 
-    def sell(self, symbol, amount):
+    def sell(self, symbol, amount, tag=None, type="market"):
         amount = float(self.exg.exchange.amount_to_precision(symbol, amount))
         price = self.get_price_now(symbol)
         cost = amount * price
@@ -79,7 +90,19 @@ class Engine:
             return
         self.wallet[symbol] -= amount
         self.wallet[self.base] += cost
-        self.trade_csv.record([self.now, symbol, "sell", amount, price, cost])
+        self.trade_csv.record(
+            [
+                self.now,
+                symbol,
+                "sell",
+                type,
+                amount,
+                price,
+                cost,
+                self.wallet[self.base],
+                tag,
+            ]
+        )
 
     def on_bar(self):
         raise NotImplementedError("on_bar method not implemented")

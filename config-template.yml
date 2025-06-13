@@ -3,3 +3,6 @@ dolphindb:
   port: 8848
   user: admin
   passwd: 123456dolphindb
+
+proxy:
+  https: http://127.0.0.1:7890
