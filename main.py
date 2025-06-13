@@ -46,9 +46,10 @@ class TestStartegy(Engine):
 
 
 if __name__ == "__main__":
-    exg = Exchange()
-    engine = TestStartegy(exg)
-    engine.run()
+    # exg = Exchange()
+    # engine = TestStartegy(exg)
+    # engine.run()
     # print(analyze.get_position_structure("logs/trade.csv"))
-    # test_zip_filepath = "logs/20250613_155453.zip"
-    # trade_df, config_dict = analyze.get_trade_df_config_dict(test_zip_filepath)
+    test_zip_filepath = "logs/20250613_162150.zip"
+    trade_df, config_dict = analyze.get_trade_df_config_dict(test_zip_filepath)
+    position_dict = analyze.get_position_structure(test_zip_filepath)
