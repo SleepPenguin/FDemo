@@ -8,10 +8,15 @@ from utils import analyze
 class TestStartegy(Engine):
     def __init__(self, exg: Exchange):
         super().__init__(exg)
+        self.name = "TestStartegy"
         self.start_time = pd.Timestamp("2023-01-01")
         self.end_time = pd.Timestamp("2024-01-01")
         self.simframe = "1m"
-        self.used_info = {("BTC/USDT", "1d"): 30, ("BTC/USDT", self.simframe): 0}
+        self.used_info = {
+            ("BTC/USDT", "1d"): 30,
+            ("BTC/USDT", self.simframe): 0,
+            ("ETH/USDT", self.simframe): 0,
+        }
 
     def on_bar(self):
         # 只在每天23:00执行
@@ -30,16 +35,20 @@ class TestStartegy(Engine):
             cost = 100
             price = self.get_price_now(trade_symbol)
             self.buy(trade_symbol, cost / price, "buy_sma_5_20")
+            self.buy("ETH/USDT", cost / price, "buy_sma_5_20")
         elif (
             sma_5_1d.iloc[-1] < sma_20_1d.iloc[-1]
             and sma_5_1d.iloc[-2] > sma_20_1d.iloc[-2]
         ):
             position = self.wallet[trade_symbol]
             self.sell(trade_symbol, position, "sell_sma_5_20")
+            self.sell("ETH/USDT", position, "sell_sma_5_20")
 
 
 if __name__ == "__main__":
-    # exg = Exchange()
-    # engine = TestStartegy(exg)
-    # engine.run()
-    print(analyze.get_position_structure("logs/trade.csv"))
+    exg = Exchange()
+    engine = TestStartegy(exg)
+    engine.run()
+    # print(analyze.get_position_structure("logs/trade.csv"))
+    # test_zip_filepath = "logs/20250613_155453.zip"
+    # trade_df, config_dict = analyze.get_trade_df_config_dict(test_zip_filepath)
