@@ -71,7 +71,7 @@ class Engine:
 
     def get_price_now(self, symbol):
         # TODO: 使用订单簿获取价格
-        return self.get_price(symbol, self.simframe, 1)["close"].iloc[-1]
+        return float(self.get_price(symbol, self.simframe, 1)["close"].iloc[-1])
 
     def buy(self, symbol, amount, tag=None, type="market"):
         amount = float(self.exg.exchange.amount_to_precision(symbol, amount))
@@ -95,7 +95,7 @@ class Engine:
                 amount,
                 price,
                 cost,
-                self.wallet[self.base],
+                self.wallet,
                 tag,
             ]
         )
@@ -120,7 +120,7 @@ class Engine:
                 amount,
                 price,
                 cost,
-                self.wallet[self.base],
+                self.wallet,
                 tag,
             ]
         )
