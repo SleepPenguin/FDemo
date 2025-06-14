@@ -14,13 +14,15 @@ exg = Exchange()
 @app.route("/api/kline", methods=["POST"])
 def get_kline():
     req = request.get_json()
-    symbol = req.get("symbol", "BTC/USDT")
-    timeframe = req.get("timeframe", "1d")
-    start = ccxt.Exchange.parse8601(req.get("start_date") + " 00:00:00")
-    end = ccxt.Exchange.parse8601(req.get("end_date") + " 23:59:59")
+    symbol = req.get("symbol")
+    timeframe = req.get("timeframe")
+    start_date = req.get("startDate")
+    end_date = req.get("endDate")
     print(
-        f"receive update symbol: {symbol}, timeframe: {timeframe}, start: {start}, end: {end}"
+        f"receive update symbol: {symbol}, timeframe: {timeframe}, start: {start_date}, end: {end_date}"
     )
+    start = ccxt.Exchange.parse8601(start_date + " 00:00:00")
+    end = ccxt.Exchange.parse8601(end_date + " 23:59:59")
     time_grid = utils.grid_time(timeframe, start, end)
     max_render_lines = 5000
     if len(time_grid) > max_render_lines:
