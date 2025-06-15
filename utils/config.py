@@ -17,3 +17,4 @@ DB_PASSWD = config[DB_NAME]["passwd"]
 
 
 HTTPS_PROXY = config["proxy"]["https"]
+WS_PROXY = config["proxy"]["ws"]
